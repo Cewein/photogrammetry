@@ -9,6 +9,7 @@ ARCore-app/[Bb]uild/
 ARCore-app/[Bb]uilds/
 ARCore-app/[Ll]ogs/
 ARCore-app/[Uu]ser[Ss]ettings/
+ARCore-app/[Aa]ssets/ARRealismDemos
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
@@ -69,3 +70,5 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+ARCore-app/Assets/ARRealismDemos.meta
+arcore-unity-extension-1.26.0.tgz

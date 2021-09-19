@@ -4,6 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 0
+    path: Assets/ARRealismDemos/PointCloud/Scenes/RawPointClouds.unity
+    guid: 9dda67f2895da44a2a949d2298c7ff3a
   m_configObjects:
-    UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: de86c73f1e9e5b744bfd7ee9efaf4bec, type: 2}
+    Unity.XR.Oculus.Settings: {fileID: 11400000, guid: a89c888e7d7a5684c8c931ee96374c67, type: 2}
+    UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: db7b556b8487b4812a0ff676e92fc7c8, type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 58f40b12bbc864f3c96c6505a9a1e1e3, type: 2}

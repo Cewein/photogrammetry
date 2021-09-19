@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.google.ar.core.arfoundation.extensions": "file:C:/Users/Cewein/Downloads/arcore-unity-extensions-1.25.0.tgz",
+    "com.google.ar.core.arfoundation.extensions": "file:D:/photogrammetry/arcore-unity-extension-1.26.0.tgz",
     "com.unity.collab-proxy": "1.5.7",
     "com.unity.ide.rider": "2.0.7",
     "com.unity.ide.visualstudio": "2.0.9",
@@ -10,8 +10,8 @@
     "com.unity.timeline": "1.4.8",
     "com.unity.toolchain.win-x86_64-linux-x86_64": "0.1.21-preview",
     "com.unity.ugui": "1.0.0",
-    "com.unity.xr.arcore": "4.2.0-pre.10",
-    "com.unity.xr.arfoundation": "4.2.0-pre.10",
+    "com.unity.xr.arfoundation": "4.2.0",
+    "com.unity.xr.oculus": "1.9.1",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
