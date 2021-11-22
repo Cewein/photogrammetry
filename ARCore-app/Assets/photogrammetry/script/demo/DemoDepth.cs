@@ -7,7 +7,7 @@ public class DemoDepth : MonoBehaviour
     public ComputeShader compute;
 
     [HideInInspector]
-    public Texture2D depth;
+    static public RenderTexture depthTexture;
 
 
     // Start is called before the first frame update
@@ -31,6 +31,8 @@ public class DemoDepth : MonoBehaviour
             int tileY = (src.height + 7) / 8;
 
             compute.Dispatch(0, tileX, tileY, 1);
+
+            Graphics.Blit(depthBuffer, depthTexture);
 
             Graphics.Blit(depthBuffer, dest);
         }
