@@ -9,23 +9,36 @@ public class PointCloud : MonoBehaviour
     public Mesh mesh;
     public Camera cam;
 
-    ComputeBuffer argsBuffer;
+    private ComputeBuffer argsBuffer;
+    private uint numInstances;
    
 
     // Start is called before the first frame update
     void Start()
     {
-        uint numInstances = (uint)(DemoDepth.depthTexture.width * DemoDepth.depthTexture.height);
+        numInstances = (uint)(DemoDepth.depthTexture.width * DemoDepth.depthTexture.height);
 
         argsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
         argsBuffer.SetData(new uint[] { mesh.GetIndexCount(0), numInstances, 0, 0, 0 });
 
-        mat.SetTexture("DepthTexture", DemoDepth.depthTexture);
+        print(numInstances);
     }
 
     // Update is called once per frame
     void Update()
     {
+        uint numInstancesTmp = (uint)(DemoDepth.depthTexture.width * DemoDepth.depthTexture.height);
+
+        if (numInstancesTmp > 1 && numInstances != numInstancesTmp)
+        {
+            numInstances = numInstancesTmp;
+            argsBuffer.Release();
+            argsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
+            argsBuffer.SetData(new uint[] { mesh.GetIndexCount(0), numInstances, 0, 0, 0 });
+
+            print(numInstances);
+        }
+
         mat.SetTexture("DepthTexture", DemoDepth.depthTexture);
         mat.SetInt("width", DemoDepth.depthTexture.width);
         mat.SetInt("height", DemoDepth.depthTexture.height);

@@ -1,4 +1,4 @@
-Shader "Unlit/PointCloudShader"
+Shader "Instanced/PointCloudShader"
 {
     Properties
     {
@@ -7,12 +7,11 @@ Shader "Unlit/PointCloudShader"
     {
         Pass
         {
-            Tags {"Queue" = "Geometry" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
+            Tags {"RenderType" = "Transparent"}
             ZWrite Off
             Lighting Off
             Fog { Mode Off }
 
-            Blend SrcAlpha OneMinusSrcAlpha
             CGPROGRAM
 
             #pragma vertex vert
@@ -61,17 +60,15 @@ Shader "Unlit/PointCloudShader"
 
 
                 v2f o;
-                o.pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0f));
+                o.pos = float4(worldPosition, 1.0f);
                 o.uv = v.texcoord;
                 return o;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            fixed4 frag(v2f i) : SV_Target
             {
                 // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
+                fixed4 col = fixed4(1.0,0.0,0.0,1.0);
                 return col;
             }
             ENDCG
