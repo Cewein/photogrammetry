@@ -627,6 +627,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mat: {fileID: 2100000, guid: d378b436497b0b9409306ef177cf1314, type: 2}
   mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  cam: {fileID: 262301596}
 --- !u!4 &1845039698
 Transform:
   m_ObjectHideFlags: 0

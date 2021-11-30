@@ -15,13 +15,20 @@ public class DemoDepth : MonoBehaviour
     {
         Camera cam = GetComponent<Camera>();
         cam.depthTextureMode = DepthTextureMode.Depth;
+       
+    }
+
+    private void Awake()
+    {
+        depthTexture = new RenderTexture(1, 1, 1);
     }
 
     void OnRenderImage(RenderTexture src, RenderTexture dest)
     {
-
+        depthTexture.Release();
         RenderTexture depthBuffer = new RenderTexture(src.width, src.height, 1);
         depthBuffer.enableRandomWrite = true;
+        depthTexture = new RenderTexture(depthBuffer);
         if (depthBuffer.Create())
         {
             compute.SetTexture(0, "_ColorBuffer", src);
