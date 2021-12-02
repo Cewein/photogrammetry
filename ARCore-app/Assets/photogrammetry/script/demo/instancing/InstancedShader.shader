@@ -23,6 +23,8 @@ Shader "Instanced/InstancedShader" {
 
             #if SHADER_TARGET >= 45
                 StructuredBuffer<float4> positionBuffer;
+                Texture2D<float4> depthTexture;
+                float width;
             #endif
 
                 struct v2f
@@ -46,13 +48,18 @@ Shader "Instanced/InstancedShader" {
                 {
                 #if SHADER_TARGET >= 45
                     float4 data = positionBuffer[instanceID];
+
+                    int x = instanceID % width;
+                    int y = instanceID / width;
+
+                    float depth = depthTexture.Load(int3(x, y, 0)).w;
+                    float3 color = depthTexture.Load(int3(x, y, 0)).xyz;
                 #else
                     float4 data = 0;
+                    float depth = 0;
                 #endif
 
-                    float rotation = data.w * data.w * _Time.x * 0.5f;
-                    rotate2D(data.xz, rotation);
-
+                    data.z += depth;
                     float3 localPosition = v.vertex.xyz * data.w;
                     float3 worldPosition = data.xyz + localPosition;
                     float3 worldNormal = v.normal;
@@ -62,7 +69,6 @@ Shader "Instanced/InstancedShader" {
                     float3 ndotl = saturate(dot(worldNormal, _WorldSpaceLightPos0.xyz));
                     float3 ambient = ShadeSH9(float4(worldNormal, 1.0f));
                     float3 diffuse = (ndotl * _LightColor0.rgb);
-                    float3 color = v.color;
 
                     v2f o;
                     o.pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0f));
@@ -76,12 +82,13 @@ Shader "Instanced/InstancedShader" {
 
                 fixed4 frag(v2f i) : SV_Target
                 {
+
                     fixed shadow = SHADOW_ATTENUATION(i);
-                    fixed4 albedo = tex2D(_MainTex, i.uv_MainTex);
+                    fixed4 albedo = fixed4(i.color, 1.0);
                     float3 lighting = i.diffuse * shadow + i.ambient;
                     fixed4 output = fixed4(albedo.rgb * i.color * lighting, albedo.w);
                     UNITY_APPLY_FOG(i.fogCoord, output);
-                    return output;
+                    return albedo;
                 }
 
                 ENDCG

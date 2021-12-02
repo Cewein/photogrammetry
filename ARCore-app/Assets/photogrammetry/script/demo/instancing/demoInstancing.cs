@@ -8,9 +8,11 @@ public class demoInstancing : MonoBehaviour
     public Mesh instanceMesh;
     public Material instanceMaterial;
     public int subMeshIndex = 0;
+    public float size = 0.01f;
 
     private int cachedInstanceCount = -1;
     private int cachedSubMeshIndex = -1;
+    private float cachedSize = -1.0f;
     private ComputeBuffer positionBuffer;
     private ComputeBuffer argsBuffer;
     private uint[] args = new uint[5] { 0, 0, 0, 0, 0 };
@@ -18,18 +20,21 @@ public class demoInstancing : MonoBehaviour
     void Start()
     {
         argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        instanceCount = DemoDepth.depthTexture.width * DemoDepth.depthTexture.height;
         UpdateBuffers();
     }
 
     void Update()
     {
         // Update starting position buffer
-        if (cachedInstanceCount != instanceCount || cachedSubMeshIndex != subMeshIndex)
+        instanceCount = DemoDepth.depthTexture.width * DemoDepth.depthTexture.height;
+
+        if (cachedInstanceCount != instanceCount || cachedSubMeshIndex != subMeshIndex || cachedSize != size)
             UpdateBuffers();
 
-        // Pad input
-        if (Input.GetAxisRaw("Horizontal") != 0.0f)
-            instanceCount = (int)Mathf.Clamp(instanceCount + Input.GetAxis("Horizontal") * 40000, 1.0f, 5000000.0f);
+        //need to call the mat and bind the renderTexture
+        instanceMaterial.SetTexture("depthTexture", DemoDepth.depthTexture);
+        instanceMaterial.SetInt("width", DemoDepth.depthTexture.width);
 
         // Render
         Graphics.DrawMeshInstancedIndirect(instanceMesh, subMeshIndex, instanceMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), argsBuffer);
@@ -38,7 +43,6 @@ public class demoInstancing : MonoBehaviour
     void OnGUI()
     {
         GUI.Label(new Rect(265, 25, 200, 30), "Instance Count: " + instanceCount.ToString());
-        instanceCount = (int)GUI.HorizontalSlider(new Rect(25, 20, 200, 30), (float)instanceCount, 1.0f, 5000000.0f);
     }
 
     void UpdateBuffers()
@@ -52,13 +56,16 @@ public class demoInstancing : MonoBehaviour
             positionBuffer.Release();
         positionBuffer = new ComputeBuffer(instanceCount, 16);
         Vector4[] positions = new Vector4[instanceCount];
-        for (int i = 0; i < instanceCount; i++)
+
+        int width = DemoDepth.depthTexture.width;
+        int height = DemoDepth.depthTexture.height;
+
+        for (int i = 0; i < width; i++)
         {
-            float angle = Random.Range(0.0f, Mathf.PI * 2.0f);
-            float distance = Random.Range(20.0f, 100.0f);
-            float height = Random.Range(-2.0f, 2.0f);
-            float size = Random.Range(0.05f, 0.25f);
-            positions[i] = new Vector4(Mathf.Sin(angle) * distance, height, Mathf.Cos(angle) * distance, size);
+            for (int j = 0; j < height; j++)
+            {
+                positions[i + j * Mathf.Max(width,height)] = new Vector4((i * 1.0f) / width, (j * 1.0f) / height, 0, size);
+            }
         }
         positionBuffer.SetData(positions);
         instanceMaterial.SetBuffer("positionBuffer", positionBuffer);
@@ -79,6 +86,7 @@ public class demoInstancing : MonoBehaviour
 
         cachedInstanceCount = instanceCount;
         cachedSubMeshIndex = subMeshIndex;
+        cachedSize = size;
     }
 
     void OnDisable()

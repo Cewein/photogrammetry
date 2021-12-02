@@ -5,6 +5,7 @@ using UnityEngine;
 public class DemoDepth : MonoBehaviour
 {
     public ComputeShader compute;
+    public Camera cam;
 
     [HideInInspector]
     static public RenderTexture depthTexture;
@@ -13,9 +14,7 @@ public class DemoDepth : MonoBehaviour
     // Start is called before the first frame update
     void OnPreRender()
     {
-        Camera cam = GetComponent<Camera>();
-        cam.depthTextureMode = DepthTextureMode.Depth;
-       
+        cam.depthTextureMode = DepthTextureMode.Depth;  
     }
 
     private void Awake()

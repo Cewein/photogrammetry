@@ -9,8 +9,6 @@ Texture2D<float4> _ColorBuffer;
 
 RWTexture2D<float4> _DetphBufferRW;
 
-RWStructuredBuffer<float4> _DepthBuffer;
-
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
