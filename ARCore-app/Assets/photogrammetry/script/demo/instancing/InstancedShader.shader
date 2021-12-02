@@ -49,8 +49,8 @@ Shader "Instanced/InstancedShader" {
                 #if SHADER_TARGET >= 45
                     float4 data = positionBuffer[instanceID];
 
-                    int x = instanceID % width;
-                    int y = instanceID / width;
+                    int x = int(instanceID) % width;
+                    int y = int(instanceID) / width;
 
                     float depth = depthTexture.Load(int3(x, y, 0)).w;
                     float3 color = depthTexture.Load(int3(x, y, 0)).xyz;
@@ -75,7 +75,7 @@ Shader "Instanced/InstancedShader" {
                     o.uv_MainTex = v.texcoord;
                     o.ambient = ambient;
                     o.diffuse = diffuse;
-                    o.color = color;
+                    o.color = float3(depth, depth, depth);
                     TRANSFER_SHADOW(o)
                     return o;
                 }

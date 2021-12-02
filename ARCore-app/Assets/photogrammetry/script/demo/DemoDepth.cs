@@ -24,10 +24,12 @@ public class DemoDepth : MonoBehaviour
 
     void OnRenderImage(RenderTexture src, RenderTexture dest)
     {
-        depthTexture.Release();
+        if (Input.GetKey(KeyCode.Space))
+            depthTexture.Release();
         RenderTexture depthBuffer = new RenderTexture(src.width, src.height, 1);
         depthBuffer.enableRandomWrite = true;
-        depthTexture = new RenderTexture(depthBuffer);
+        if (Input.GetKey(KeyCode.Space))
+            depthTexture = new RenderTexture(depthBuffer);
         if (depthBuffer.Create())
         {
             compute.SetTexture(0, "_ColorBuffer", src);
@@ -38,7 +40,8 @@ public class DemoDepth : MonoBehaviour
 
             compute.Dispatch(0, tileX, tileY, 1);
 
-            Graphics.Blit(depthBuffer, depthTexture);
+            if(Input.GetKey(KeyCode.Space))
+                Graphics.Blit(depthBuffer, depthTexture);
 
             Graphics.Blit(depthBuffer, dest);
         }
