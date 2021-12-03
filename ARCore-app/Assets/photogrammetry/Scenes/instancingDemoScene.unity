@@ -893,7 +893,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a46345b141f08ff4d95274f4d591afa8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  compute: {fileID: 7200000, guid: 6c38b08172414304394cd8b6c1a8b0e5, type: 3}
+  shader: {fileID: 4800000, guid: c96d84b8391c25949a80c54023001703, type: 3}
   cam: {fileID: 1652946780}
 --- !u!1 &1735141782
 GameObject:
