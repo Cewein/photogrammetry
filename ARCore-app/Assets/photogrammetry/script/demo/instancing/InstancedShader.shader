@@ -22,9 +22,14 @@ Shader "Instanced/InstancedShader" {
                 sampler2D _MainTex;
 
             #if SHADER_TARGET >= 45
-                StructuredBuffer<float4> positionBuffer;
                 Texture2D<float4> depthTexture;
-                float width;
+                int imageWidth;
+                int imageHeight;
+                float3 cameraPosition;
+                float3 cameraForward;
+                float3 cameraUp;
+                float3 vfov;
+
             #endif
 
                 struct v2f
@@ -35,37 +40,31 @@ Shader "Instanced/InstancedShader" {
                     SHADOW_COORDS(4)
                 };
 
-                void rotate2D(inout float2 v, float r)
-                {
-                    float s, c;
-                    sincos(r, s, c);
-                    v = float2(v.x * c - v.y * s, v.x * s + v.y * c);
-                }
-
                 v2f vert(appdata_full v, uint instanceID : SV_InstanceID)
                 {
                 #if SHADER_TARGET >= 45
-                    float4 data = positionBuffer[instanceID];
+                    float x = float(instanceID) % imageWidth;
+                    float y = float(instanceID) / imageWidth;
+                    
+                    float4 depthTex = depthTexture.Load(int3(x, y, 0)); 
+                    float depth = depthTex.w;
+                    float3 color = depthTex.xyz;
 
-                    int x = int(instanceID) % width;
-                    int y = int(instanceID) / width;
-
-                    float depth = depthTexture.Load(int3(x, y, 0)).w;
-                    float3 color = depthTexture.Load(int3(x, y, 0)).xyz;
                 #else
                     float4 data = 0;
                     float depth = 0;
                 #endif
 
-                    data.z += Linear01Depth(depth) * _ProjectionParams.z;
-                    float3 localPosition = v.vertex.xyz * data.w;
-                    float3 worldPosition = data.xyz + localPosition;
-                    float3 worldNormal = v.normal;
+                    float2 uv = float2(x,y) / float2(imageWidth, imageHeight);
+
+                    float3 localPosition = v.vertex.xyz * 1.0/ imageWidth;
+                    float3 worldPosition = float3(uv, Linear01Depth(depth) * _ProjectionParams.z) + localPosition;
+                    float3 worldNormal = v.normal; 
 
                     v2f o;
                     o.pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0f));
                     o.uv_MainTex = v.texcoord;
-                    o.color = float4(color, depth);
+                    o.color = float4(color, 1.0);
                     return o;
                 }
 

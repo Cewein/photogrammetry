@@ -13,9 +13,12 @@ public class demoInstancing : MonoBehaviour
     private int cachedInstanceCount = -1;
     private int cachedSubMeshIndex = -1;
     private float cachedSize = -1.0f;
-    private ComputeBuffer positionBuffer;
     private ComputeBuffer argsBuffer;
     private uint[] args = new uint[5] { 0, 0, 0, 0, 0 };
+
+    private int imageWidth, imageHeight;
+    private Vector4 cameraPosition, cameraForward, cameraUp;
+    private float vfov;
 
     void Start()
     {
@@ -32,9 +35,11 @@ public class demoInstancing : MonoBehaviour
         if (cachedInstanceCount != instanceCount || cachedSubMeshIndex != subMeshIndex || cachedSize != size)
             UpdateBuffers();
 
+
         //need to call the mat and bind the renderTexture
         instanceMaterial.SetTexture("depthTexture", DemoDepth.depthTexture);
-        instanceMaterial.SetInt("width", DemoDepth.depthTexture.width);
+        instanceMaterial.SetInt("imageWidth", DemoDepth.depthTexture.width);
+        instanceMaterial.SetInt("imageHeight", DemoDepth.depthTexture.height);
 
         // Render
         Graphics.DrawMeshInstancedIndirect(instanceMesh, subMeshIndex, instanceMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), argsBuffer);
@@ -50,25 +55,6 @@ public class demoInstancing : MonoBehaviour
         // Ensure submesh index is in range
         if (instanceMesh != null)
             subMeshIndex = Mathf.Clamp(subMeshIndex, 0, instanceMesh.subMeshCount - 1);
-
-        // Positions
-        if (positionBuffer != null)
-            positionBuffer.Release();
-        positionBuffer = new ComputeBuffer(instanceCount, 16);
-        Vector4[] positions = new Vector4[instanceCount];
-
-        int width = DemoDepth.depthTexture.width;
-        int height = DemoDepth.depthTexture.height;
-
-        for (int i = 0; i < width; i++)
-        {
-            for (int j = 0; j < height; j++)
-            {
-                positions[i + j * Mathf.Max(width,height)] = new Vector4((i * 1.0f) / width, (j * 1.0f) / height, 0, size);
-            }
-        }
-        positionBuffer.SetData(positions);
-        instanceMaterial.SetBuffer("positionBuffer", positionBuffer);
 
         // Indirect args
         if (instanceMesh != null)
@@ -91,10 +77,6 @@ public class demoInstancing : MonoBehaviour
 
     void OnDisable()
     {
-        if (positionBuffer != null)
-            positionBuffer.Release();
-        positionBuffer = null;
-
         if (argsBuffer != null)
             argsBuffer.Release();
         argsBuffer = null;

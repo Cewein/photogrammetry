@@ -170,7 +170,7 @@ MonoBehaviour:
   instanceMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   instanceMaterial: {fileID: 2100000, guid: 732538171982caa41bc26282b0bd4773, type: 2}
   subMeshIndex: 0
-  size: 0.005
+  size: 10
 --- !u!1 &200422550
 GameObject:
   m_ObjectHideFlags: 0
@@ -830,7 +830,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 61.927513
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -877,10 +877,10 @@ MonoBehaviour:
   speed: 5
   up: 303
   down: 256
-  left: 276
-  right: 275
-  front: 273
-  back: 274
+  left: 113
+  right: 100
+  front: 122
+  back: 115
 --- !u!114 &1652946783
 MonoBehaviour:
   m_ObjectHideFlags: 0
