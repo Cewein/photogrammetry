@@ -1,4 +1,4 @@
-Shader "depth/demoDepth"
+Shader "depth/Depth"
 {
     Properties
     {
@@ -50,9 +50,6 @@ Shader "depth/demoDepth"
 
                 //get the depth for the gien pixel
                 float depth = tex2D(_CameraDepthTexture, i.uv).r;
-
-                //linear depth between camera and far clipping plane
-                //depth = Linear01Depth(depth) * _ProjectionParams.z;
 
                 return float4(col, depth);
             }

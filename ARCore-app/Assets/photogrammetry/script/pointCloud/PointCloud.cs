@@ -4,59 +4,78 @@ using UnityEngine;
 
 public class PointCloud : MonoBehaviour
 {
-
-    public Material mat;
-    public Mesh mesh;
-    public Camera cam;
+    public Mesh instanceMesh;
+    public Material instanceMaterial;
+    public float MeshSize = 0.01f;
 
     public DepthMap depthMap;
+    public Camera cam;
 
+    private int instanceCount;
+    private int cachedInstanceCount = -1;
     private ComputeBuffer argsBuffer;
-    private uint numInstances;
-   
+    private uint[] args = new uint[5] { 0, 0, 0, 0, 0 };
 
-    // Start is called before the first frame update
     void Start()
     {
-        numInstances = (uint)(depthMap.GetSize());
-
         argsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
-        argsBuffer.SetData(new uint[] { mesh.GetIndexCount(0), numInstances, 0, 0, 0 });
-
-        print(numInstances);
+        instanceCount = depthMap.GetSize();
+        UpdateBuffers();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        uint numInstancesTmp = (uint)(depthMap.GetSize());
+        // Update starting position buffer
+        instanceCount = depthMap.GetSize();
 
-        if (numInstancesTmp > 1 && numInstances != numInstancesTmp)
+        if (cachedInstanceCount != instanceCount)
         {
-            numInstances = numInstancesTmp;
-            argsBuffer.Release();
-            argsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
-            argsBuffer.SetData(new uint[] { mesh.GetIndexCount(0), numInstances, 0, 0, 0 });
-
-            print(numInstances);
+            instanceMaterial.SetMatrix("camMat", cam.cameraToWorldMatrix);
+            instanceMaterial.SetMatrix("InvCamMatProj", Matrix4x4.Inverse(cam.projectionMatrix));
+            instanceMaterial.SetVector("camPos", cam.transform.position);
+            UpdateBuffers();
         }
 
-        mat.SetTexture("DepthTexture", depthMap.depthTexture);
-        mat.SetInt("width", depthMap.depthTexture.width);
-        mat.SetInt("height", depthMap.depthTexture.height);
+        //need to call the mat and bind the renderTexture
+        instanceMaterial.SetTexture("depthTexture", depthMap.depthTexture);
+        instanceMaterial.SetInt("imageWidth", depthMap.depthTexture.width);
+        instanceMaterial.SetInt("imageHeight", depthMap.depthTexture.height);
+        instanceMaterial.SetMatrix("invKmat", Matrix4x4.Inverse(Math.CameraIntrinsicMatrix(depthMap.depthTexture.width, depthMap.depthTexture.height, cam.fieldOfView)));
+        instanceMaterial.SetFloat("meshSize", MeshSize);
 
-        mat.SetVector("cameraPosition", cam.transform.position);
-        mat.SetVector("cameraForward", cam.transform.forward);
-        mat.SetVector("cameraUp", cam.transform.up);
-        mat.SetVector("cameraRight", cam.transform.right);
-        mat.SetFloat("cameraFOV", cam.fieldOfView);
-
-
-        Graphics.DrawMeshInstancedIndirect(mesh, 0, mat, mesh.bounds, argsBuffer);
+        // Render
+        Graphics.DrawMeshInstancedIndirect(instanceMesh, 0, instanceMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), argsBuffer);
     }
 
-    private void OnDestroy()
+    void OnGUI()
     {
-        argsBuffer.Release();
+        GUI.Label(new Rect(265, 25, 200, 30), "Instance Count: " + instanceCount.ToString());
+    }
+
+    void UpdateBuffers()
+    {
+        // Indirect args
+        if (instanceMesh != null)
+        {
+            args[0] = (uint)instanceMesh.GetIndexCount(0);
+            args[1] = (uint)instanceCount;
+            args[2] = (uint)instanceMesh.GetIndexStart(0);
+            args[3] = (uint)instanceMesh.GetBaseVertex(0);
+        }
+        else
+        {
+            args[0] = args[1] = args[2] = args[3] = 0;
+        }
+
+        argsBuffer.SetData(args);
+
+        cachedInstanceCount = instanceCount;
+    }
+
+    void OnDisable()
+    {
+        if (argsBuffer != null)
+            argsBuffer.Release();
+        argsBuffer = null;
     }
 }

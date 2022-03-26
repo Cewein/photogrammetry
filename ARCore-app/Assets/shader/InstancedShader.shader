@@ -21,16 +21,17 @@ Shader "Instanced/InstancedShader" {
 
                 sampler2D _MainTex;
 
-            #if SHADER_TARGET >= 45
                 Texture2D<float4> depthTexture;
                 int imageWidth;
                 int imageHeight;
-                float3 cameraPosition;
-                float3 cameraForward;
-                float3 cameraUp;
-                float3 vfov;
+                float hfov;
+                float meshSize;
+                float4x4 invKmat;
 
-            #endif
+                float4x4 camMat;
+                float4x4 InvCamMatProj;
+                float3 camPos;
+
 
                 struct v2f
                 {
@@ -40,9 +41,24 @@ Shader "Instanced/InstancedShader" {
                     SHADOW_COORDS(4)
                 };
 
+                float3 getWorldPos(float x, float y, float depth)
+                {
+                    float2 uv = float2(x, y) / float2(imageWidth, imageHeight);
+
+                    float zDepth = Linear01Depth(depth) * _ProjectionParams.z;
+
+                    float3 viewfloattor = mul(InvCamMatProj, float4(uv * 2.0 - 1.0, 0.0, -1.0));
+                    viewfloattor = mul(camMat, float4(viewfloattor, 0.0));
+
+                    float3 rayOrigin = camPos;
+                    float viewLength = length(viewfloattor);
+                    float3 rayDir = viewfloattor / viewLength;
+
+                    return rayOrigin + (rayDir * zDepth);
+                }
+
                 v2f vert(appdata_full v, uint instanceID : SV_InstanceID)
                 {
-                #if SHADER_TARGET >= 45
                     float x = float(instanceID) % imageWidth;
                     float y = float(instanceID) / imageWidth;
                     
@@ -50,19 +66,12 @@ Shader "Instanced/InstancedShader" {
                     float depth = depthTex.w;
                     float3 color = depthTex.xyz;
 
-                #else
-                    float4 data = 0;
-                    float depth = 0;
-                #endif
-
-                    float2 uv = float2(x,y) / float2(imageWidth, imageHeight);
-
-                    float3 localPosition = v.vertex.xyz * 1.0/ imageWidth;
-                    float3 worldPosition = float3(uv, Linear01Depth(depth) * _ProjectionParams.z) + localPosition;
+                    float3 localPosition = v.vertex.xyz * meshSize;
+                    float3 worldPosition = getWorldPos(x, y, depth) + localPosition;
                     float3 worldNormal = v.normal; 
 
                     v2f o;
-                    o.pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0f));
+                    o.pos = UnityObjectToClipPos(float4(worldPosition, 1.0f));
                     o.uv_MainTex = v.texcoord;
                     o.color = float4(color, 1.0);
                     return o;
@@ -70,8 +79,7 @@ Shader "Instanced/InstancedShader" {
 
                 float4 frag(v2f i) : SV_Target
                 {
-                    float4 colAndPos = i.color;
-                    return colAndPos;
+                    return i.color;
                 }
 
                 ENDCG
